@@ -34,7 +34,7 @@ class UsersControllerTest < ActionController::TestCase
   setup do
     @resource = users(:geoffroy)
   end
-  
+
   test 'should get show' do
     get :show, id: @resource
     assert_response :success
@@ -64,6 +64,8 @@ Array attributes are receiving a special treatment, i.e. they are joined with ne
 Documents are stored with a special attribute `__fixture_name` which is used to retrieve it and establish relations.
 
 `Mongoid::Document` has an `attr_accessor` defined for `__fixture_name` so it doesn't pose any problem if you try to `dup` a document for example.
+
+Do not attempt to set the `_id` field in your fixtures.
 
 ## Changes compared to ActiveRecord
 

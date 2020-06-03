@@ -112,6 +112,7 @@ module Mongoid
 
       def sanitize_new_embedded_documents(document, is_new = false)
         document.relations.each do |name, relation|
+          next unless relation.respond_to? :macro
           case relation.macro
           when :embeds_one
             if (document.changes[name] && !document.changes[name][1].nil?) ||
@@ -198,7 +199,6 @@ module Mongoid
       documents[class_name] = fixtures.map do |label, fixture|
         unmarshall_fixture(label, fixture, model_class)
       end
-
       return documents
     end
 
@@ -230,7 +230,8 @@ module Mongoid
       set_attributes_timestamps(model_class, attributes)
 
       model_class.relations.each_value do |relation|
-        case relation.macro
+        next unless relation.respond_to? :macro
+        case relation&.macro
         when :belongs_to
           unmarshall_belongs_to(model_class, attributes, relation)
         when :has_many
