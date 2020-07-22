@@ -112,15 +112,14 @@ module Mongoid
 
       def sanitize_new_embedded_documents(document, is_new = false)
         document.relations.each do |name, relation|
-          next unless relation.respond_to? :macro
-          case relation.macro
-          when :embeds_one
+          case relation.class.to_s
+          when "Mongoid::Association::Embedded::EmbedsOne"
             if (document.changes[name] && !document.changes[name][1].nil?) ||
               (is_new && document[name])
 
               embedded_document_set_default_values(document.public_send(relation.name), document[name])
             end
-          when :embeds_many
+          when "Mongoid::Association::Embedded::EmbedsMany"
             if (document.changes[name] && !document.changes[name][1].nil?) ||
               (is_new && document[name])
 
@@ -129,7 +128,7 @@ module Mongoid
                 embedded_document_set_default_values(embedded, document[name][i])
               end
             end
-          when :belongs_to
+          when "Mongoid::Association::Referenced::BelongsTo"
             if is_new && document.attributes[name]
               value = document.attributes.delete(name)
               if value.is_a?(Hash)
@@ -231,10 +230,10 @@ module Mongoid
 
       model_class.relations.each_value do |relation|
         next unless relation.respond_to? :macro
-        case relation&.macro
-        when :belongs_to
+        case relation.class.to_s
+        when Mongoid::Association::Referenced::BelongsTo
           unmarshall_belongs_to(model_class, attributes, relation)
-        when :has_many
+        when Mongoid::Association::References::HasMany
           unmarshall_has_many(model_class, attributes, relation)
         when :has_and_belongs_to_many
           unmarshall_has_and_belongs_to_many(model_class, attributes, relation)
@@ -358,4 +357,3 @@ module Mongoid
     end
   end
 end
-
