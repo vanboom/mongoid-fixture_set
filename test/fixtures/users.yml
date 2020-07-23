@@ -4,19 +4,6 @@ geoffroy:
   main_group: sudoers
   groups:
     - print
-    - !ruby/hash
-      name: Test nested polymorphic belongs_to
-      something: orga1 (Organisation)
-    - !ruby/hash
-      name: Test nested has_many creation
-      main_users:
-        - {
-          firstname: 'Created in nested group'
-        }
-  items:
-    - {
-      name: Test
-    }
 user1:
   firstname: Margot
   lastname: Last
@@ -28,7 +15,7 @@ user1:
       address:
         city: Strasbourg
         real: true
-user 2é:
+user2:
   firstname: user2
   main_group:
       name: Win?

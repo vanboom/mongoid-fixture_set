@@ -5,5 +5,6 @@ class Organisation
   field :name
 
   has_many :groups, as: :something
+  has_one :address
+  
 end
-

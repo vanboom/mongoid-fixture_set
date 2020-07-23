@@ -5,8 +5,10 @@ print:
   name: Print
   users:
     - user1
-    - user 2é
+    - user2
 group1:
   name: Margot
+  users:
+    - geoffroy
   main_users:
     - user1

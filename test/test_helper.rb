@@ -18,7 +18,8 @@ ActiveSupport::TestCase.test_order = :random
 
 class BaseTest < ActiveSupport::TestCase
   def teardown
-    Mongoid::Sessions.default.use('mongoid_fixture_set_test').drop
+    #Mongoid::Sessions.default.use('mongoid_fixture_set_test').drop
+    Mongoid.default_client.use('mongoid_fixture_set_test').database.drop
   end
 end
 

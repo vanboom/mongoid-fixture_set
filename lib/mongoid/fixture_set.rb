@@ -99,9 +99,11 @@ module Mongoid
 
         keys = (attributes.keys + document.attributes.keys).uniq
         keys.each do |key|
+          # detect nested attributes
           if attributes[key].is_a?(Array) || document[key].is_a?(Array)
-            document[key] = Array(attributes[key]) + Array(document[key])
-          else
+            # DVB: this statement does not cause the timers relation to be saves
+            document[key] = (Array(attributes[key]) + Array(document[key]))
+          elsif attributes[key]
             document[key] = attributes[key] || document[key]
           end
         end
@@ -156,7 +158,8 @@ module Mongoid
 
         document = model.where('__fixture_name' => fixture_name).first
         if document.nil?
-          document = model.new
+          # force the object ID to be based on the fixture name
+          document = model.new(id: fixture_object_id(fixture_name).to_s)
           document['__fixture_name'] = fixture_name
           document.save(validate: false)
         end
@@ -229,13 +232,13 @@ module Mongoid
       set_attributes_timestamps(model_class, attributes)
 
       model_class.relations.each_value do |relation|
-        next unless relation.respond_to? :macro
+        #next unless relation.respond_to? :macro
         case relation.class.to_s
-        when Mongoid::Association::Referenced::BelongsTo
+        when "Mongoid::Association::Referenced::BelongsTo"
           unmarshall_belongs_to(model_class, attributes, relation)
-        when Mongoid::Association::References::HasMany
+        when "Mongoid::Association::Referenced::HasMany"
           unmarshall_has_many(model_class, attributes, relation)
-        when :has_and_belongs_to_many
+        when "Mongoid::Association::Referenced::HasAndBelongsToMany"
           unmarshall_has_and_belongs_to_many(model_class, attributes, relation)
         end
       end
@@ -355,5 +358,12 @@ module Mongoid
         end
       end
     end
+
+    ##
+    # compute the object id based on a string
+    def self.fixture_object_id(fixture_name)
+      BSON::ObjectId.from_data fixture_name
+    end
+
   end
 end

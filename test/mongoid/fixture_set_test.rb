@@ -46,13 +46,13 @@ module Mongoid
 
     def test_should_create_fixtures
       Mongoid::FixtureSet.reset_cache
-      fs = Mongoid::FixtureSet.create_fixtures('test/fixtures/', %w(users groups schools organisations))
+      fs = Mongoid::FixtureSet.create_fixtures('test/fixtures/', %w(users items groups schools organisations))
 
       users = fs.find{|x| x.model_class == User}
       f_geoffroy = users['geoffroy']
 
       assert_equal 6, School.count
-      assert_equal 6, User.count
+      assert_equal 5, User.count
 
       geoffroy = User.find_by(firstname: 'Geoffroy')
       user1 = User.find_by(firstname: 'Margot')
@@ -61,19 +61,21 @@ module Mongoid
       group1 = Group.find_by(name: 'Margot')
       orga1 = Organisation.find_by(name: '1 Organisation')
       school = School.find_by(name: 'School')
+      # This is a belongs_to item that attempts to be set in users.yml
+      # it should be defined in its own fixture with a reference to user
       test_item = Item.find_by(name: 'Test')
       user2 = User.find_by(firstname: 'user2')
       win_group = Group.find_by(name: 'Win?')
-      test_nested_polymorphic_belongs_to = Group.find_by(name: 'Test nested polymorphic belongs_to')
-      test_nested_has_many_creation = Group.find_by(name: 'Test nested has_many creation')
-      User.find_by(firstname: 'Created in nested group')
+# DVB this should not be allowed
+#      test_nested_polymorphic_belongs_to = Group.find_by(name: 'Test nested polymorphic belongs_to')
+#      test_nested_has_many_creation = Group.find_by(name: 'Test nested has_many creation')
+#      User.find_by(firstname: 'Created in nested group')
 
       assert_equal user1.address.organisation, orga1
       assert_equal 1, user1.homes.count
       assert_equal geoffroy, f_geoffroy.find
       assert_equal 3, print.users.count
       assert print.users.include?(geoffroy)
-      assert print.users.include?(user1)
       assert sudoers.main_users.include?(geoffroy)
       assert_equal group1, user1.main_group
       assert_equal print, user1.groups.first
@@ -84,7 +86,7 @@ module Mongoid
       assert_equal group1, school.groups.first
       assert_equal school, group1.something
 
-      assert_equal 3, orga1.groups.count
+      assert_equal 2, orga1.groups.count
       assert orga1.groups.include?(sudoers)
       assert_equal orga1, sudoers.something
     end
