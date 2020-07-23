@@ -101,7 +101,7 @@ module Mongoid
         keys.each do |key|
           # detect nested attributes
           if attributes[key].is_a?(Array) || document[key].is_a?(Array)
-            # DVB: this statement does not cause the timers relation to be saves
+            # DVB: strange handling here
             document[key] = (Array(attributes[key]) + Array(document[key]))
           elsif attributes[key]
             document[key] = attributes[key] || document[key]
