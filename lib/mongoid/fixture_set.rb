@@ -161,7 +161,7 @@ module Mongoid
           # force the object ID to be based on the fixture name
           document = model.new(id: fixture_object_id(fixture_name).to_s)
           document['__fixture_name'] = fixture_name
-          document.save(validate: false)
+          #document.save(validate: false)
         end
         return document
       end
