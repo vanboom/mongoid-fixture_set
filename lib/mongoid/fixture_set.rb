@@ -90,7 +90,7 @@ module Mongoid
       def create_or_update_document(model, attributes)
         model = model.constantize if model.is_a? String
 
-        document = find_or_create_document(model, attributes['__fixture_name'])
+        document = find_or_new_document(model, attributes['__fixture_name'])
         update_document(document, attributes)
       end
 
@@ -136,7 +136,7 @@ module Mongoid
               if value.is_a?(Hash)
                 raise Mongoid::FixtureSet::FixtureError.new "Unable to create nested document inside an embedded document"
               end
-              doc = find_or_create_document(relation.class_name, value)
+              doc = find_or_new_document(relation.class_name, value)
               document.attributes[relation.foreign_key] = doc.id
             end
           end
@@ -153,7 +153,7 @@ module Mongoid
         end
       end
 
-      def find_or_create_document(model, fixture_name)
+      def find_or_new_document(model, fixture_name)
         model = model.constantize if model.is_a? String
 
         document = model.where('__fixture_name' => fixture_name).first
@@ -161,6 +161,9 @@ module Mongoid
           # force the object ID to be based on the fixture name
           document = model.new(id: fixture_object_id(fixture_name).to_s)
           document['__fixture_name'] = fixture_name
+          ##
+          # DVB:  do not save the document here without attributes because
+          # this inhibits the use of attr_readonly
           #document.save(validate: false)
         end
         return document
@@ -222,7 +225,7 @@ module Mongoid
 
       if !attributes.has_key?('_id')
         if label
-          document = self.class.find_or_create_document(model_class, label)
+          document = self.class.find_or_new_document(model_class, label)
         else
           document = model_class.new
         end
@@ -264,9 +267,9 @@ module Mongoid
       if relation.polymorphic? && value.sub!(/\s*\(([^)]*)\)\s*/, '')
         type = $1
         attributes[relation.inverse_type] = type
-        attributes[relation.foreign_key]  = self.class.find_or_create_document(type, value).id
+        attributes[relation.foreign_key]  = self.class.find_or_new_document(type, value).id
       else
-        attributes[relation.foreign_key]  = self.class.find_or_create_document(relation.class_name, value).id
+        attributes[relation.foreign_key]  = self.class.find_or_new_document(relation.class_name, value).id
       end
     end
 
@@ -288,7 +291,7 @@ module Mongoid
           next
         end
 
-        document = self.class.find_or_create_document(relation.class_name, value)
+        document = self.class.find_or_new_document(relation.class_name, value)
         if relation.polymorphic?
           self.class.update_document(document, {
             relation.foreign_key => attributes['_id'],
@@ -320,7 +323,7 @@ module Mongoid
           next
         end
 
-        document = self.class.find_or_create_document(relation.class_name, value)
+        document = self.class.find_or_new_document(relation.class_name, value)
         attributes[key] << document.id
 
         self.class.update_document(document, {
