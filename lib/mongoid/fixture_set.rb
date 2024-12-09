@@ -155,7 +155,6 @@ module Mongoid
 
       def find_or_new_document(model, fixture_name)
         model = model.constantize if model.is_a? String
-
         document = model.where('__fixture_name' => fixture_name).first
         if document.nil?
           # force the object ID to be based on the fixture name
@@ -164,7 +163,8 @@ module Mongoid
           ##
           # DVB:  do not save the document here without attributes because
           # this inhibits the use of attr_readonly
-          #document.save(validate: false)
+          # HUH?  This is causing belongs_to relations not to preload - REMOVE IT 12/9/2024
+          document.save(validate: false)
         end
         return document
       end
